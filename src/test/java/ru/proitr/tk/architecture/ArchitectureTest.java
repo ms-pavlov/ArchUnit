@@ -277,6 +277,18 @@ public class ArchitectureTest {
     }
 
     @Test
+    @DisplayName("Не допускается использование ThreadPoolExecutor с неограниченным количеством потоков")
+    void no_unlimited_tread_pool() {
+        ArchRule rule = noClasses()
+                .should()
+                .callMethod(Executors.class, "newCachedThreadPool")
+                .orShould()
+                .callMethod(Executors.class, "newCachedThreadPool", ThreadFactory.class);
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+    @Test
     @DisplayName("Не допускаются jooq выражения для модификации без условия WHERE, кроме INSERT")
     void all_jooq_executes_except_insert_have_where_condition() {
         ArchRule rule = classes().that()
@@ -316,19 +328,4 @@ public class ArchitectureTest {
 
         rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
     }
-
-    @Test
-    @DisplayName("Не допускается использование ThreadPoolExecutor с неограниченным количеством потоков")
-    void no_unlimited_tread_pool() {
-        ArchRule rule = noClasses()
-                .should()
-                .callMethod(Executors.class, "newCachedThreadPool")
-                .orShould()
-                .callMethod(Executors.class, "newCachedThreadPool", ThreadFactory.class);
-
-        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
-    }
-
-
-
 }
