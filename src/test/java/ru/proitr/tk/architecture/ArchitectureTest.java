@@ -6,10 +6,18 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
+import org.example.EaistRequestContext;
+import org.example.Secure;
+import org.example.SecureMultiple;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import java.util.Map;
+
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 @Epic("АРМ ТК")
@@ -26,7 +34,8 @@ public class ArchitectureTest {
     private static final String MAPPER_PACKAGE = "ru.proitr.tk.mapper";
     private static final String JOOQ_GEN_PACKAGE = "ru.proitr.tk.generated";
     private static final String DAO_PACKAGE = "ru.proitr.tk.generated.tables.daos";
-    private static final String CONDITION_BUILDER_PACKAGE = "ru.proitr.tk.repository.conditionbuilder";
+    private static final String INTERNAL_CONTROLLER_PACKAGE = "ru.proitr.controller.internal";
+
 
     private ClassFileImporter getBaseFileImporter() {
         return new ClassFileImporter()
@@ -106,5 +115,134 @@ public class ArchitectureTest {
         rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
     }
 
+    @Test
+    @DisplayName("Класс EaistRequestContext можно использовать только в классах контролерах")
+    void eaist_request_context_only_in_controllers() {
+        ArchRule rule = noClasses()
+                .should()
+                .resideOutsideOfPackages(CONTROLLER_PACKAGE + "..")
+                .andShould()
+                .dependOnClassesThat()
+                .areAssignableTo(EaistRequestContext.class);
 
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+    @Test
+    @DisplayName("Все классы сервисы должны быть с аннотацией Service и содержать \"Service\" в имени")
+    void all_classes_in_service_package_are_annotated_and_correctly_named() {
+        ArchRule rule = classes().that()
+                .resideInAPackage(SERVICE_PACKAGE + "..")
+                .and().areNotNestedClasses()
+                .and().areNotInterfaces()
+                .should()
+                .beAnnotatedWith(Service.class)
+                .andShould()
+                .haveSimpleNameEndingWith("Service");
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+    @Test
+    @DisplayName("Все классы за пределами пакета сервисов не должны содержать аннотацию Service и \"Service\" в имени")
+    void no_services_outside_of_package() {
+        ArchRule rule = noClasses().that()
+                .resideOutsideOfPackage(SERVICE_PACKAGE + "..")
+                .should()
+                .beAnnotatedWith(Service.class);
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+    @Test
+    @DisplayName("Все методы классов контроллеров должны не должны принимать аргументы класса Map")
+    void all_methods_in_classes_controller_package_should_not_accept_arguments_map() {
+        ArchRule rule = methods()
+                .that()
+                .areDeclaredInClassesThat()
+                .resideInAPackage(CONTROLLER_PACKAGE + "..")
+                .and()
+                .arePublic()
+                .should()
+                .notHaveRawParameterTypes(Map.class);
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+    @Test
+    @DisplayName("Все методы с аннотацией SecureMultiple или Secure, должны быть в не Internal контроллерах")
+    void all_internal_controller_without_security() {
+        ArchRule rule = noMethods().that()
+                .areAnnotatedWith(SecureMultiple.class)
+                .or()
+                .areAnnotatedWith(Secure.class)
+                .should()
+                .bePublic()
+                .andShould()
+                .beDeclaredInClassesThat()
+                .haveNameMatching(".+InternalController")
+                .andShould()
+                .beDeclaredInClassesThat()
+                .resideInAPackage(CONTROLLER_PACKAGE + "..")
+                .orShould()
+                .beDeclaredInClassesThat()
+                .resideInAPackage(INTERNAL_CONTROLLER_PACKAGE + "..")
+                .andShould()
+                .bePublic();
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+    @Test
+    @DisplayName("Все исключения должны быть специализированны")
+    void on_throwable() {
+        ArchRule rule = codeUnits()
+                .should()
+                .notDeclareThrowableOfType(Error.class)
+                .orShould()
+                .notDeclareThrowableOfType(Throwable.class)
+                .orShould()
+                .notDeclareThrowableOfType(Exception.class)
+                .orShould()
+                .notDeclareThrowableOfType(RuntimeException.class);
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+    @Test
+    @DisplayName("Аннотация @Autowired над конструкторами ставиться по-умолчанию")
+    void autowired_for_constructors() {
+        ArchRule rule = constructors()
+                .that()
+                .areNotAnnotatedWith(Autowired.class)
+                .should()
+                .beDeclaredInClassesThat()
+                .resideInAPackage(SERVICE_PACKAGE + "..");
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+    @Test
+    @DisplayName("Внедрений через поля не должно быть")
+    void autowired_for_fields() {
+        ArchRule rule = noFields()
+                .should()
+                .beAnnotatedWith(Autowired.class)
+                .orShould()
+                .beAnnotatedWith(Value.class);
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+    @Test
+    @DisplayName("Внедрений через поля не должно быть")
+    void autowired_for_methods() {
+        ArchRule rule = noMethods()
+                .should()
+                .beAnnotatedWith(Autowired.class)
+                .orShould()
+                .beAnnotatedWith(Value.class);
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
 }
