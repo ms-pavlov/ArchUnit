@@ -35,6 +35,10 @@ public class ArchitectureTest {
     private static final String JOOQ_GEN_PACKAGE = "ru.proitr.tk.generated";
     private static final String DAO_PACKAGE = "ru.proitr.tk.generated.tables.daos";
     private static final String INTERNAL_CONTROLLER_PACKAGE = "ru.proitr.controller.internal";
+    private static final String JAKARTA_SERVLET_PACKAGE = "jakarta.servlet";
+    private static final String UTIL_PACKAGE = "ru.proitr.tk.util";
+    private static final String SERVLET_PACKAGE = "ru.proitr.tk.servlet";
+    private static final String SECURITY_PACKAGE = "ru.proitr.tk.core.security";
 
 
     private ClassFileImporter getBaseFileImporter() {
@@ -245,4 +249,22 @@ public class ArchitectureTest {
 
         rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
     }
+
+    @Test
+    @DisplayName("Классы jakarta.servlet доступны только в сервлетах, Security-фильтрах и Util классах")
+    void  no_servlet_servlet_logic_outside_servlets_and_utils() {
+        ArchRule rule =
+                noClasses().that()
+                        .resideOutsideOfPackage(SERVLET_PACKAGE + "..")
+                        .and()
+                        .resideOutsideOfPackage(SECURITY_PACKAGE + "..")
+                        .and()
+                        .resideOutsideOfPackage(UTIL_PACKAGE + "..")
+                        .should()
+                        .dependOnClassesThat()
+                        .resideInAPackage(JAKARTA_SERVLET_PACKAGE + "..");
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
 }
