@@ -1,11 +1,17 @@
 package ru.proitr.tk.architecture;
 
+import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
+import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
+import org.example.DAOImpl;
 import org.example.EaistRequestContext;
 import org.example.Secure;
 import org.example.SecureMultiple;
@@ -13,9 +19,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
@@ -266,5 +275,62 @@ public class ArchitectureTest {
 
         rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
     }
+
+    @Test
+    @DisplayName("Не допускаются jooq выражения для модификации без условия WHERE, кроме INSERT")
+    void all_jooq_executes_except_insert_have_where_condition() {
+        ArchRule rule = classes().that()
+                        .areAnnotatedWith(Repository.class)
+                        .and()
+                        .areNotAssignableTo(DAOImpl.class)
+                        .should(
+                                new ArchCondition<JavaClass>(
+                                        "check methods with .execute() (dslContext.update() / dslContext.delete() " +
+                                                "have a condition where)"
+                                ) {
+                                    @Override
+                                    public void check(JavaClass javaClass, ConditionEvents conditionEvents) {
+                                        javaClass.getMethods()
+                                                .stream()
+                                                .filter(JavaMethod::isMethod)
+                                                .filter(method -> method.getCallsFromSelf()
+                                                        .stream()
+                                                        .anyMatch(call -> "execute".equals(call.getName())) &&
+                                                        method.getCallsFromSelf()
+                                                                .stream()
+                                                                .noneMatch(call -> "insertInto".equals(call.getName()))
+                                                )
+                                                .filter(method -> method.getCallsFromSelf()
+                                                        .stream()
+                                                        .noneMatch(call -> "where".equals(call.getName()))
+                                                )
+                                                .forEach(javaMethod -> {
+                                                    conditionEvents.add(
+                                                            new SimpleConditionEvent(
+                                                                    javaClass,
+                                                                    false,
+                                                                    javaMethod.getFullName() +
+                                                                            " possible doing .execute() without block where()")
+                                                    );
+                                                });
+                                    }
+                                });
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+    @Test
+    @DisplayName("Не допускается использование ThreadPoolExecutor с неограниченным количеством потоков")
+    void no_unlimited_tread_pool() {
+        ArchRule rule = noClasses()
+                .should()
+                .callMethod(Executors.class, "newCachedThreadPool")
+                .orShould()
+                .callMethod(Executors.class, "newCachedThreadPool", ThreadFactory.class);
+
+        rule.check(getBaseFileImporter().importPackages(CORE_PACKAGE));
+    }
+
+
 
 }
