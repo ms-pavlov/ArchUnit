@@ -284,7 +284,7 @@ public class ArchitectureTest {
                         .and()
                         .areNotAssignableTo(DAOImpl.class)
                         .should(
-                                new ArchCondition<JavaClass>(
+                                new ArchCondition<>(
                                         "check methods with .execute() (dslContext.update() / dslContext.delete() " +
                                                 "have a condition where)"
                                 ) {
@@ -304,15 +304,13 @@ public class ArchitectureTest {
                                                         .stream()
                                                         .noneMatch(call -> "where".equals(call.getName()))
                                                 )
-                                                .forEach(javaMethod -> {
-                                                    conditionEvents.add(
-                                                            new SimpleConditionEvent(
-                                                                    javaClass,
-                                                                    false,
-                                                                    javaMethod.getFullName() +
-                                                                            " possible doing .execute() without block where()")
-                                                    );
-                                                });
+                                                .forEach(javaMethod -> conditionEvents.add(
+                                                        new SimpleConditionEvent(
+                                                                javaClass,
+                                                                false,
+                                                                javaMethod.getFullName() +
+                                                                        " possible doing .execute() without block where()")
+                                                ));
                                     }
                                 });
 
