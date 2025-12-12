@@ -1,4 +1,4 @@
-package ru.proitr.service;
+package org.example.service;
 
 import org.springframework.stereotype.Repository;
 

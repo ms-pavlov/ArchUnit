@@ -12,6 +12,7 @@ import com.tngtech.archunit.library.Architectures;
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
+import org.example.generated.tables.daos.DAOImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -200,7 +201,7 @@ public class JUnitSetyleArchitectureTest {
     @Test
     @DisplayName("Все исключения должны быть специализированны")
     void on_throwable() {
-        ArchRule rule = ArchRuleDefinition.codeUnits()
+        ArchRule rule = ArchRuleDefinition.noCodeUnits()
                 .should()
                 .notDeclareThrowableOfType(Error.class)
                 .orShould()

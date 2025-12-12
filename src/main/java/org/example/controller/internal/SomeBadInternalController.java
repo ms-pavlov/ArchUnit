@@ -1,9 +1,9 @@
-package ru.proitr.controller.internal;
+package org.example.controller.internal;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.example.Secure;
+import org.example.client.SomeClient;
 import org.springframework.kafka.core.KafkaTemplate;
-import ru.proitr.Secure;
-import ru.proitr.client.SomeClient;
 
 import java.util.Map;
 

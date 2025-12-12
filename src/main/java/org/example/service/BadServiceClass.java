@@ -1,11 +1,11 @@
-package ru.proitr.service;
+package org.example.service;
 
+import org.example.generated.tables.daos.DAOImpl;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ru.proitr.controller.internal.SomeBadInternalController;
-import ru.proitr.generated.tables.daos.DAOImpl;
+import org.example.controller.internal.SomeBadInternalController;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

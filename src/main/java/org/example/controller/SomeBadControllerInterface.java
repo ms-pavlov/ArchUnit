@@ -1,7 +1,7 @@
-package ru.proitr.controller;
+package org.example.controller;
 
+import org.example.Secure;
 import org.springframework.transaction.annotation.Transactional;
-import ru.proitr.Secure;
 
 public interface SomeBadControllerInterface {
 

@@ -1,4 +1,4 @@
-package ru.proitr.arch;
+package org.example.arch;
 
 import com.tngtech.archunit.core.domain.JavaAccess;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -17,10 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.RestController;
-import ru.proitr.EaistRequestContext;
-import ru.proitr.Secure;
-import ru.proitr.SecureMultiple;
-import ru.proitr.generated.tables.daos.DAOImpl;
+import org.example.EaistRequestContext;
+import org.example.Secure;
+import org.example.SecureMultiple;
+import org.example.generated.tables.daos.DAOImpl;
 
 import java.util.Map;
 import java.util.concurrent.Executors;

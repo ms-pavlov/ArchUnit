@@ -1,4 +1,4 @@
-package ru.proitr.arch;
+package org.example.arch;
 
 import com.tngtech.archunit.core.importer.Location;
 

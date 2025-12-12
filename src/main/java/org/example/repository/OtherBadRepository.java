@@ -1,4 +1,4 @@
-package ru.proitr.repository;
+package org.example.repository;
 
 public class OtherBadRepository {
 

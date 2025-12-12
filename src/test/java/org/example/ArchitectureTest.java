@@ -9,6 +9,7 @@ import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
+import org.example.generated.tables.daos.DAOImpl;
 import org.jooq.DSLContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -32,7 +33,7 @@ public class ArchitectureTest {
     private static final String CONTROLLER_PACKAGE = "org.example.controller";
     private static final String LISTENER_PACKAGE = "org.example.listener";
     private static final String SERVICE_PACKAGE = "org.example.service";
-    private static final String CLIENT_PACKAGE = "org.example.core.client";
+    private static final String CLIENT_PACKAGE = "org.example.client";
     private static final String REPOSITORY_PACKAGE = "org.example.repository";
     private static final String PRODUCER_PACKAGE = "org.example.producer";
     private static final String MAPPER_PACKAGE = "org.example.mapper";

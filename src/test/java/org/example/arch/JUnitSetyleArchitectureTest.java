@@ -1,4 +1,4 @@
-package ru.proitr.arch;
+package org.example.arch;
 
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaMethod;
@@ -12,16 +12,16 @@ import com.tngtech.archunit.library.Architectures;
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
+import org.example.EaistRequestContext;
+import org.example.Secure;
+import org.example.SecureMultiple;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
-import ru.proitr.EaistRequestContext;
-import ru.proitr.Secure;
-import ru.proitr.SecureMultiple;
-import ru.proitr.generated.tables.daos.DAOImpl;
+import org.example.generated.tables.daos.DAOImpl;
 
 import java.util.Map;
 import java.util.concurrent.Executors;

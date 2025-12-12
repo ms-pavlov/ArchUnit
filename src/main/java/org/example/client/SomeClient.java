@@ -1,4 +1,4 @@
-package ru.proitr.client;
+package org.example.client;
 
 public class SomeClient {
 }

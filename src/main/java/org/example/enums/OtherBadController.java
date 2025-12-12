@@ -1,4 +1,4 @@
-package ru.proitr.enums;
+package org.example.enums;
 
 import org.springframework.web.bind.annotation.RestController;
 

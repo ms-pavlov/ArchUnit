@@ -1,8 +1,8 @@
-package ru.proitr.repository;
+package org.example.repository;
 
+import org.example.EaistRequestContext;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
-import ru.proitr.EaistRequestContext;
 
 @Repository
 public class BadRepository {
